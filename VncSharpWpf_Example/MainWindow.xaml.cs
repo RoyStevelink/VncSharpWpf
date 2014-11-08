@@ -69,7 +69,7 @@ namespace VncSharpWpf_Example
                 {
                     try
                     {
-                        rdp.Connect("localhost", MenuItem_ViewOnly.IsChecked, MenuItem_ClippedView.IsChecked);
+                        rdp.Connect(vncHost, MenuItem_ViewOnly.IsChecked, MenuItem_ClippedView.IsChecked);
                     }
                     catch (VncProtocolException vex)
                     {

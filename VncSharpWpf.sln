@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VncSharpWpf", "VncSharpWpf\VncSharpWpf.csproj", "{77B5CB63-E14B-4253-881D-6BE9D7C57076}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VncSharpWpf_Example", "VncSharpWpf_Example\VncSharpWpf_Example.csproj", "{A166674C-7FBA-43CC-BE79-70A2650647FF}"
