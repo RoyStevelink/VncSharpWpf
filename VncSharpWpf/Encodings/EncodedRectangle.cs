@@ -85,27 +85,17 @@ namespace VncSharpWpf.Encodings
 		public abstract void Decode();
 
         /// <summary>
-        /// After calling Decode() an EncodedRectangle can be drawn to a Bitmap, which is the local representation of the remote desktop.
+        /// After calling Decode() an EncodedRectangle can be drawn to a Bitmap, which is the local representation of the remote desktop
+        /// Make sure bitmap is properly locked/unlocked
         /// </summary>
         /// <param name="desktop">The image the represents the remote desktop. NOTE: this image will be altered.</param>
         public virtual void Draw(WriteableBitmap desktop)
         {
-            //desktop.WritePixels(new Int32Rect(0, 0, rectangle.Width, rectangle.Height), 
-            //                    framebuffer.GetPixelArray(),
-            //                    rectangle.Width * 4,
-            //                    rectangle.X,
-            //                    rectangle.Y);
-           // desktop.Lock();
             DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, framebuffer.GetPixelArray());
-           // desktop.Unlock();
         }
 
         public void DrawRectangle(WriteableBitmap writeableBitmap, int left, int top, int width, int height, int[] pixelArray)
         {
-            // Compute the pixel's color
-            //int colorData = color.R << 16; // R
-            //colorData |= color.G << 8; // G
-            //colorData |= color.B << 0; // B
             int bpp = writeableBitmap.Format.BitsPerPixel / 8;
             int counter = 0;
             unsafe
