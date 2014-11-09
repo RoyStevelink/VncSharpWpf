@@ -274,9 +274,23 @@ namespace VncSharpWpf
 		// The VncClient object handles thread marshalling onto the UI thread.
 		protected void VncUpdate(object sender, VncEventArgs e)
 		{
-            Dispatcher.Invoke(new Action(() => {
+		   
+		   
+            //Dispatcher.Invoke(new Action(() =>
+            //{
+                if (e.Lock)
+                {
+                    desktop.Lock();
+                }
                 e.DesktopUpdater.Draw(desktop);
-            }));
+
+                if (e.ReleaseLock)
+                {
+                    desktop.Unlock();
+                }
+            //}));
+
+          
 
             if (state == RuntimeState.Connected) {
 				vnc.RequestScreenUpdate(fullScreenRefresh);

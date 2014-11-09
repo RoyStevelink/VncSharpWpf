@@ -39,10 +39,10 @@ namespace VncSharpWpf.Encodings
 
             ushort pixel = (ushort)(((uint)b[0]) & 0xFF | ((uint)b[1]) << 8);
 
-			byte red   = (byte) (((pixel >> framebuffer.RedShift)   & framebuffer.RedMax)   << 3);  // 5 bits to 8
-			byte green = (byte) (((pixel >> framebuffer.GreenShift) & framebuffer.GreenMax) << 2);  // 6 bits to 8
-			byte blue  = (byte) (((pixel >> framebuffer.BlueShift)  & framebuffer.BlueMax)  << 3);  // 5 bits to 8
-
+		    byte red = (byte)(((pixel >> framebuffer.RedShift) & framebuffer.RedMax) * 255 / framebuffer.RedMax);
+			byte green = (byte)(((pixel >> framebuffer.GreenShift) & framebuffer.GreenMax) * 255 / framebuffer.GreenMax);
+			byte blue = (byte)(((pixel >> framebuffer.BlueShift) & framebuffer.BlueMax) * 255 / framebuffer.BlueMax);
+ 
 			return ToGdiPlusOrder(red, green, blue);			
 		}
 	}

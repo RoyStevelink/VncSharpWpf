@@ -898,18 +898,45 @@ namespace VncSharpWpf
                 if (compressedBufferSize > 64 * 1024 * 1024)
                     throw new Exception("ZRLE decoder: Invalid compressed data size");
 
-                // Make sure the buffer is large enough to hold the data
-                if ((_buffer == null) || (_buffer.Length < compressedBufferSize))
-                    _buffer = new byte[compressedBufferSize + 1024];
+                //// Make sure the buffer is large enough to hold the data
+                //if ((_buffer == null) || (_buffer.Length < compressedBufferSize))
+                //    _buffer = new byte[compressedBufferSize + 1024];
 
                 // Decode stream
-                var pos = 0;
-                while (pos < compressedBufferSize)
-                {
-                    var bytesRead = BaseStream.Read(_buffer, pos, compressedBufferSize - pos);
-                    pos += bytesRead;
-                }
-                zlibDecompressedStream.Write(_buffer, 0, pos);
+               // int pos = 0;
+				// while (pos++ < compressedBufferSize)
+				// 	zlibDecompressedStream.WriteByte(this.BaseStream.ReadByte());
+							
+				// Decode stream in blocks
+				int bytesToRead;
+				int bytesNeeded = compressedBufferSize;
+				int maxBufferSize = 64 * 1024; // 64k buffer
+				byte[] receiveBuffer = new byte[maxBufferSize];
+                NetworkStream netStream = (NetworkStream)this.BaseStream;
+				do
+				{
+					if (netStream.DataAvailable)
+					{
+						bytesToRead = bytesNeeded;
+
+						// the byteToRead should never exceed the maxBufferSize
+						if (bytesToRead > maxBufferSize)
+							bytesToRead = maxBufferSize;
+
+						// try reading bytes
+						int bytesRead = netStream.Read(receiveBuffer, 0, bytesToRead);
+						// lower the bytesNeeded with the bytesRead.
+						bytesNeeded -= bytesRead;
+
+						// write the readed bytes to the decompression stream.
+						zlibDecompressedStream.Write(receiveBuffer, 0, bytesRead);
+					}
+					else
+						// there isn't any data atm. let's give the processor some time.
+						Thread.Sleep(1);
+
+			} while (bytesNeeded > 0);
+				
 
                 zlibMemoryStream.Position = 0;
             }

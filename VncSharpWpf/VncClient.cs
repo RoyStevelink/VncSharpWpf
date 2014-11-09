@@ -498,7 +498,7 @@ namespace VncSharpWpf
 
                             if (CheckIfThreadDone())
                                 break;
-
+                            Console.WriteLine(string.Format("Number of update rectangles: {0}", rectangles));
                             // TODO: consider gathering all update rectangles in a batch and *then* posting the event back to the main thread.
                             for (int i = 0; i < rectangles; ++i) {
                                 // Get the update rectangle's info
@@ -511,9 +511,14 @@ namespace VncSharpWpf
 
                                 // Let the UI know that an updated rectangle is available, but check
                                 // to see if the user closed things down first.
-                                if (!CheckIfThreadDone() && VncUpdate != null) {
-                                    VncEventArgs e = new VncEventArgs(er);
+                                if (!CheckIfThreadDone() && VncUpdate != null)
+                                {
+                                    // determine lock /unlock bitmap
+                                    bool releaseLock = i == rectangles - 1;
+                                    bool Lock = i == 0;
 
+                                    VncEventArgs e = new VncEventArgs(er,Lock, releaseLock);
+                                    Thread.Sleep(10);
                                     // In order to play nicely with WinForms controls, we do a check here to 
                                     // see if it is necessary to synchronize this event with the UI thread.
                                     if (VncUpdate.Target is System.Windows.Forms.Control) {
@@ -522,7 +527,7 @@ namespace VncSharpWpf
                                             target.Invoke(VncUpdate, new object[] { this, e });
                                     } else {
                                         // Target is not a WinForms control, so do it on this thread...
-                                        VncUpdate(this, new VncEventArgs(er));
+                                        VncUpdate(this, new VncEventArgs(er,Lock, releaseLock));
                                     }
                                 }
                             }

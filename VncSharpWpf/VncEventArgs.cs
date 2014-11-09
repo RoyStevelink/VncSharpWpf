@@ -22,10 +22,15 @@ namespace VncSharpWpf
 	public class VncEventArgs : EventArgs
 	{
 		IDesktopUpdater updater;
-		
-		public VncEventArgs(IDesktopUpdater updater) : base()
+	    private bool _releaseLock;
+        private bool _Lock; 
+
+
+		public VncEventArgs(IDesktopUpdater updater,bool lockImage,  bool releaseLock) : base()
 		{
 			this.updater = updater;
+		    _releaseLock = releaseLock;
+		    _Lock = lockImage;
 		}
 		
 		/// <summary>
@@ -36,5 +41,14 @@ namespace VncSharpWpf
 				return updater; 
 			}
 		}
+
+	    public bool ReleaseLock
+	    {
+            get { return _releaseLock; }
+	    }
+        public bool Lock
+        {
+            get { return _Lock; }
+        }
 	}
 }

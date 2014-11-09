@@ -90,11 +90,48 @@ namespace VncSharpWpf.Encodings
         /// <param name="desktop">The image the represents the remote desktop. NOTE: this image will be altered.</param>
         public virtual void Draw(WriteableBitmap desktop)
         {
-            desktop.WritePixels(new Int32Rect(0, 0, rectangle.Width, rectangle.Height), 
-                                framebuffer.GetPixelArray(),
-                                rectangle.Width * 4,
-                                rectangle.X,
-                                rectangle.Y);
+            //desktop.WritePixels(new Int32Rect(0, 0, rectangle.Width, rectangle.Height), 
+            //                    framebuffer.GetPixelArray(),
+            //                    rectangle.Width * 4,
+            //                    rectangle.X,
+            //                    rectangle.Y);
+           // desktop.Lock();
+            DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, framebuffer.GetPixelArray());
+           // desktop.Unlock();
+        }
+
+        public void DrawRectangle(WriteableBitmap writeableBitmap, int left, int top, int width, int height, int[] pixelArray)
+        {
+            // Compute the pixel's color
+            //int colorData = color.R << 16; // R
+            //colorData |= color.G << 8; // G
+            //colorData |= color.B << 0; // B
+            int bpp = writeableBitmap.Format.BitsPerPixel / 8;
+            int counter = 0;
+            unsafe
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    // Get a pointer to the back buffer
+                    int pBackBuffer = (int)writeableBitmap.BackBuffer;
+
+                    // Find the address of the pixel to draw
+                    pBackBuffer += (top + y) * writeableBitmap.BackBufferStride;
+                    pBackBuffer += left * bpp;
+
+                    for (int x = 0; x < width; x++)
+                    {
+                        // Assign the color data to the pixel
+                        *((int*)pBackBuffer) = pixelArray[counter];
+
+                        // Increment the address of the pixel to draw
+                        pBackBuffer += bpp;
+                        counter ++;
+                    }
+                }
+            }
+
+            writeableBitmap.AddDirtyRect(new Int32Rect(left, top, width, height));
         }
 
 		/// <summary>
