@@ -48,7 +48,7 @@ namespace VncSharpWpf.Encodings
 			source.Y = (int) rfb.ReadUInt16();
 		}
 
-        public unsafe override void Draw(WriteableBitmap desktop)
+        public unsafe override void Draw(WriteableBitmap desktop, int[] pixelbuffer)
         {
             // Avoid exception if window is dragged bottom of screen
             if (rectangle.Top + rectangle.Height >= framebuffer.Height)
@@ -59,14 +59,19 @@ namespace VncSharpWpf.Encodings
             if ((rectangle.Y * desktop.PixelWidth + rectangle.X) < (source.Y * desktop.PixelWidth + source.X))
             {
                 Int32Rect srcRect = new Int32Rect(source.X, source.Y, rectangle.Width, rectangle.Height);
+                desktop.Unlock();
                 desktop.WritePixels(srcRect, desktop.BackBuffer, desktop.BackBufferStride * desktop.PixelHeight, desktop.PixelWidth * 4, rectangle.X, rectangle.Y);
+                desktop.Lock();
             }
             else
             {
                 Int32[] pixelBuf = new Int32[rectangle.Width * rectangle.Height];
-
+                desktop.Unlock();
                 desktop.CopyPixels(new Int32Rect(source.X, source.Y, rectangle.Width, rectangle.Height), pixelBuf, rectangle.Width * 4, 0);
                 desktop.WritePixels(new Int32Rect(0, 0, rectangle.Width, rectangle.Height), pixelBuf, rectangle.Width * 4, rectangle.X, rectangle.Y);
+                desktop.Lock();
+                //DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, pixelBuf);
+            
             }
         }
 	}

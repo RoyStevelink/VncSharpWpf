@@ -27,6 +27,7 @@ namespace VncSharpWpf.Encodings
 	{
 		public PixelReader32(BinaryReader reader, Framebuffer framebuffer) : base(reader, framebuffer)
 		{
+            BytesPerPixel = 4;
 		}
 	
 		public override int ReadPixel()
@@ -46,5 +47,22 @@ namespace VncSharpWpf.Encodings
 
 			return ToGdiPlusOrder(red, green, blue);			
 		}
+        public override int ReadPixel(byte[] buffer, int count)
+        {
+            // Read the pixel value
+            var offset = count*BytesPerPixel;
+
+            uint pixel = (uint)(((uint)buffer[offset + 0]) & 0xFF |
+                                ((uint)buffer[offset + 1]) << 8 |
+                                ((uint)buffer[offset + 2]) << 16 |
+                                ((uint)buffer[offset + 3]) << 24);
+
+            // Extract RGB intensities from pixel
+            byte red = (byte)((pixel >> framebuffer.RedShift) & framebuffer.RedMax);
+            byte green = (byte)((pixel >> framebuffer.GreenShift) & framebuffer.GreenMax);
+            byte blue = (byte)((pixel >> framebuffer.BlueShift) & framebuffer.BlueMax);
+
+            return ToGdiPlusOrder(red, green, blue);	
+        }
 	}
 }

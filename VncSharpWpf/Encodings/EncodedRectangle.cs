@@ -27,10 +27,12 @@ using System.Linq;
 
 namespace VncSharpWpf.Encodings
 {
-	/// <summary>
+    using System.Xml.Linq;
+
+    /// <summary>
 	/// Abstract class representing an Encoded Rectangle to be read, decoded, and drawn.
 	/// </summary>
-	public abstract class EncodedRectangle : IDesktopUpdater
+	public abstract class EncodedRectangle 
 	{
 		protected RfbProtocol	rfb;
 		protected Rectangle		rectangle;
@@ -89,10 +91,17 @@ namespace VncSharpWpf.Encodings
         /// Make sure bitmap is properly locked/unlocked
         /// </summary>
         /// <param name="desktop">The image the represents the remote desktop. NOTE: this image will be altered.</param>
-        public virtual void Draw(WriteableBitmap desktop)
+        public virtual void Draw(WriteableBitmap desktop, int[] pixelBuffer)
         {
-            DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, framebuffer.GetPixelArray());
+            DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, pixelBuffer);
+            
         }
+
+	    public int[] GetPixelBuffer()
+	    {
+	        return framebuffer.GetPixelArray();
+	    }
+        
 
         public void DrawRectangle(WriteableBitmap writeableBitmap, int left, int top, int width, int height, int[] pixelArray)
         {
@@ -186,10 +195,18 @@ namespace VncSharpWpf.Encodings
 				ptr = rect.Y * rectangle.Width + rect.X;	// move to the start of the rectangle in pixels
 				offset = rectangle.Width - rect.Width;		// calculate the offset to get to the start of the next row
 			}
+		    
+            //Read all bytes
+            var nrOfBytes = rect.Height*rect.Width*preader.BytesPerPixel;
+		    var buffer = new byte[nrOfBytes];
+		    preader.Read(buffer, 0, nrOfBytes);
+		    
+            var count = 0;
 
 			for (int y = 0; y < rect.Height; ++y) {
 				for (int x = 0; x < rect.Width; ++x) {
-					framebuffer[ptr++] = preader.ReadPixel();	// every pixel needs to be read from server
+                    framebuffer[ptr++] = preader.ReadPixel(buffer, count);	// every pixel needs to be read from server
+				    count++;
 				}
 				ptr += offset;								    // advance to next row within pixels
 			}

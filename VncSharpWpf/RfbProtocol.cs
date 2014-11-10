@@ -876,6 +876,11 @@ namespace VncSharpWpf
                 return uncompressedReader.ReadByte();
             }
 
+            public override int Read(byte[] buffer, int index, int count)
+            {
+                return uncompressedReader.Read(buffer,index,count);
+            }
+
             public override byte[] ReadBytes(int count)
             {
                 return uncompressedReader.ReadBytes(count);

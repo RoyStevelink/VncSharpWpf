@@ -483,7 +483,7 @@ namespace VncSharpWpf
 		{
 			int rectangles;
 			int enc;
-
+		    int[] pixelBuffer = new int[0];
 			// Get the initial destkop from the host
 			RequestScreenUpdate(true);
 
@@ -516,9 +516,12 @@ namespace VncSharpWpf
                                     // determine lock /unlock bitmap
                                     bool releaseLock = i == rectangles - 1;
                                     bool Lock = i == 0;
-
-                                    VncEventArgs e = new VncEventArgs(er,Lock, releaseLock);
-                                    Thread.Sleep(10);
+                                    if (enc != RfbProtocol.COPYRECT_ENCODING)
+                                    {
+                                        pixelBuffer = er.GetPixelBuffer();
+                                    }
+                                    VncEventArgs e = new VncEventArgs(er, Lock, releaseLock, pixelBuffer);
+                                  //  Thread.Sleep(10);
                                     // In order to play nicely with WinForms controls, we do a check here to 
                                     // see if it is necessary to synchronize this event with the UI thread.
                                     if (VncUpdate.Target is System.Windows.Forms.Control) {
@@ -527,7 +530,7 @@ namespace VncSharpWpf
                                             target.Invoke(VncUpdate, new object[] { this, e });
                                     } else {
                                         // Target is not a WinForms control, so do it on this thread...
-                                        VncUpdate(this, new VncEventArgs(er,Lock, releaseLock));
+                                        VncUpdate(this, new VncEventArgs(er, Lock, releaseLock, pixelBuffer));
                                     }
                                 }
                             }

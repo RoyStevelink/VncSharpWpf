@@ -33,9 +33,16 @@ namespace VncSharpWpf.Encodings
 
 		public override void Decode()
 		{
+            //Read all bytes
+            var nrOfBytes = rectangle.Height * rectangle.Width * preader.BytesPerPixel;
+            var buffer = new byte[nrOfBytes];
+            preader.Read(buffer, 0, nrOfBytes);
+		    var count = 0;
+
 			// Each pixel from the remote server represents a pixel to be drawn
 			for (int i = 0; i < rectangle.Width * rectangle.Height; ++i) {
-				framebuffer[i] = preader.ReadPixel();
+                framebuffer[i] = preader.ReadPixel(buffer, count);
+			    count ++;
 			}
 		}
 	}

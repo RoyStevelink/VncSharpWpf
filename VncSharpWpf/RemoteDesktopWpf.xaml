@@ -15,8 +15,8 @@
             </Style>
         </Grid.Resources>
         <Label Name="waitLabel" Content="Connecting to VNC host, please wait..." Foreground="White" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Visibility="Hidden" FontSize="14" />
-        <ScrollViewer Name="scrollviewer" VerticalScrollBarVisibility="Disabled" Panel.ZIndex="1" >
+        <Viewbox Name="scrollviewer" Panel.ZIndex="1" >
             <Image Name="designModeDesktop" />    
-        </ScrollViewer>
+        </Viewbox>
     </Grid>
 </UserControl>

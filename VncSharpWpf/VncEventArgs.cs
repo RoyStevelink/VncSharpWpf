@@ -19,24 +19,31 @@ using System;
 
 namespace VncSharpWpf
 {
-	public class VncEventArgs : EventArgs
+    using Encodings;
+
+    public class VncEventArgs : EventArgs
 	{
-		IDesktopUpdater updater;
+        EncodedRectangle updater;
 	    private bool _releaseLock;
-        private bool _Lock; 
+        private bool _Lock;
+        private int[] _pixelBuffer;
 
 
-		public VncEventArgs(IDesktopUpdater updater,bool lockImage,  bool releaseLock) : base()
+
+        public VncEventArgs(EncodedRectangle updater, bool lockImage, bool releaseLock, int[] pixelBuffer)
+            : base()
 		{
 			this.updater = updater;
 		    _releaseLock = releaseLock;
 		    _Lock = lockImage;
+		    _pixelBuffer = pixelBuffer;
 		}
 		
 		/// <summary>
 		/// Gets the IDesktopUpdater object that will handling re-drawing the desktop.
 		/// </summary>
-		public IDesktopUpdater DesktopUpdater {
+        public EncodedRectangle DesktopUpdater
+        {
 			get { 
 				return updater; 
 			}
@@ -50,5 +57,10 @@ namespace VncSharpWpf
         {
             get { return _Lock; }
         }
+
+	    public int[] PixelBuffer
+	    {
+            get { return _pixelBuffer; }
+	    }
 	}
 }

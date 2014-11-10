@@ -29,6 +29,7 @@ namespace VncSharpWpf.Encodings
 
 		public PixelReader8(BinaryReader reader, Framebuffer framebuffer, RfbProtocol rfb) : base(reader, framebuffer)
 		{
+            BytesPerPixel = 1;
 			this.rfb = rfb;
 		}
 	
@@ -41,5 +42,11 @@ namespace VncSharpWpf.Encodings
 			byte idx = reader.ReadByte();
 			return ToGdiPlusOrder((byte)rfb.MapEntries[idx, 0], (byte)rfb.MapEntries[idx, 1], (byte)rfb.MapEntries[idx, 2]);
 		}
+
+        public override int ReadPixel(byte[] buffer, int count)
+        {
+            byte idx = buffer[count];
+            return ToGdiPlusOrder((byte)rfb.MapEntries[idx, 0], (byte)rfb.MapEntries[idx, 1], (byte)rfb.MapEntries[idx, 2]);
+        }
 	}
 }

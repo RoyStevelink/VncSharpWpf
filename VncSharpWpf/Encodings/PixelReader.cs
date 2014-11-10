@@ -29,6 +29,8 @@ namespace VncSharpWpf.Encodings
 		protected BinaryReader reader;
 		protected Framebuffer framebuffer;
 
+	    public int BytesPerPixel = 1;
+
 		protected PixelReader(BinaryReader reader, Framebuffer framebuffer)
 		{
 			this.reader = reader;
@@ -36,6 +38,12 @@ namespace VncSharpWpf.Encodings
 		}
 
 		public abstract int ReadPixel();
+        public abstract int ReadPixel(byte[] buffer, int count);
+
+        public int Read(byte[] buffer, int index, int count)
+        {
+            return reader.Read(buffer, index, count);
+        }
 
 		protected int ToGdiPlusOrder(byte red, byte green, byte blue)
 		{
