@@ -340,7 +340,23 @@ namespace VncSharpWpf
         public void Connect(string host, bool viewOnly, bool scaled)
         {
             // Use Display 0 by default.
-            Connect(host, 0, viewOnly, scaled);
+            Connect(host, 0, viewOnly, scaled,null);
+        }
+
+	    /// <summary>
+	    /// Connect to a VNC Host and determine whether or not the server requires a password.
+	    /// </summary>
+	    /// <param name="host">The IP Address or Host Name of the VNC Host.</param>
+	    /// <param name="viewOnly">Determines whether mouse and keyboard events will be sent to the host.</param>
+	    /// <param name="scaled">Determines whether to use desktop scaling or leave it normal and clip.</param>
+	    /// <param name="password">Password</param>
+	    /// <exception cref="System.ArgumentNullException">Thrown if host is null.</exception>
+	    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if display is negative.</exception>
+	    /// <exception cref="System.InvalidOperationException">Thrown if the RemoteDesktop control is already Connected.  See <see cref="VncSharpWpf.RemoteDesktop.IsConnected" />.</exception>
+	    public void Connect(string host, bool viewOnly, bool scaled, string password)
+        {
+            // Use Display 0 by default.
+            Connect(host, 0, viewOnly, scaled, password);
         }
 
         /// <summary>
@@ -367,20 +383,21 @@ namespace VncSharpWpf
         /// <exception cref="System.InvalidOperationException">Thrown if the RemoteDesktop control is already Connected.  See <see cref="VncSharpWpf.RemoteDesktop.IsConnected" />.</exception>
         public void Connect(string host, int display, bool viewOnly)
         {
-            Connect(host, display, viewOnly, false);
+            Connect(host, display, viewOnly, false, null);
         }
 
-        /// <summary>
-        /// Connect to a VNC Host and determine whether or not the server requires a password.
-        /// </summary>
-        /// <param name="host">The IP Address or Host Name of the VNC Host.</param>
-        /// <param name="display">The Display number (used on Unix hosts).</param>
-        /// <param name="viewOnly">Determines whether mouse and keyboard events will be sent to the host.</param>
-        /// <param name="scaled">Determines whether to use desktop scaling or leave it normal and clip.</param>
-        /// <exception cref="System.ArgumentNullException">Thrown if host is null.</exception>
-        /// <exception cref="System.ArgumentOutOfRangeException">Thrown if display is negative.</exception>
-        /// <exception cref="System.InvalidOperationException">Thrown if the RemoteDesktop control is already Connected.  See <see cref="VncSharpWpf.RemoteDesktop.IsConnected" />.</exception>
-        public void Connect(string host, int display, bool viewOnly, bool scaled)
+	    /// <summary>
+	    /// Connect to a VNC Host and determine whether or not the server requires a password.
+	    /// </summary>
+	    /// <param name="host">The IP Address or Host Name of the VNC Host.</param>
+	    /// <param name="display">The Display number (used on Unix hosts).</param>
+	    /// <param name="viewOnly">Determines whether mouse and keyboard events will be sent to the host.</param>
+	    /// <param name="scaled">Determines whether to use desktop scaling or leave it normal and clip.</param>
+	    /// <param name="password">Password</param>
+	    /// <exception cref="System.ArgumentNullException">Thrown if host is null.</exception>
+	    /// <exception cref="System.ArgumentOutOfRangeException">Thrown if display is negative.</exception>
+	    /// <exception cref="System.InvalidOperationException">Thrown if the RemoteDesktop control is already Connected.  See <see cref="VncSharpWpf.RemoteDesktop.IsConnected" />.</exception>
+	    public void Connect(string host, int display, bool viewOnly, bool scaled,string password)
         {
             // TODO: Should this be done asynchronously so as not to block the UI?  Since an event 
             // indicates the end of the connection, maybe that would be a better design.
@@ -393,15 +410,19 @@ namespace VncSharpWpf
             vnc = new VncClient();
             vnc.ConnectionLost += new EventHandler(VncClientConnectionLost);
             vnc.ServerCutText += new EventHandler(VncServerCutText);
-
+            
             passwordPending = vnc.Connect(host, display, VncPort, viewOnly);
 
             desktopPolicy = new VncWpfDesktopPolicy(vnc, this);
             SetScalingMode(scaled);
 
             if (passwordPending) {
-                // Server needs a password, so call which ever method is refered to by the GetPassword delegate.
-                string password = GetPassword();
+
+                if (string.IsNullOrEmpty(password))
+                {
+                    // Server needs a password, so call which ever method is refered to by the GetPassword delegate.
+                    password = GetPassword();
+                }
 
                 if (password == null) {
                     // No password could be obtained (e.g., user clicked Cancel), so stop connecting
