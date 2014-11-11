@@ -116,14 +116,14 @@ namespace VncSharpWpf
 			// Use a simple desktop policy for design mode.  This will be replaced in Connect()
             desktopPolicy = new VncDesignModeDesktopPolicy(this);
 
-            //if (desktopPolicy.AutoScroll)
-            //{
-            //    scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            //    scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-            //} else {
-            //    scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            //    scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            //}
+            if (desktopPolicy.AutoScroll)
+            {
+                scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            } else {
+                scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            }
             
 			// Users of the control can choose to use their own Authentication GetPassword() method via the delegate above.  This is a default only.
 			GetPassword = new AuthenticateDelegate(PasswordDialogWpf.GetPassword);
@@ -276,12 +276,16 @@ namespace VncSharpWpf
 		{
             Dispatcher.Invoke(new Action(() =>
             {
+                //Start locking image before updating it
                 if (e.Lock)
                 {
                     desktop.Lock();
                 }
-                e.DesktopUpdater.Draw(desktop,e.PixelBuffer);
 
+                //Update buffer
+                e.DesktopUpdater.Draw(desktop,e.PixelBuffer,e.CopyRect);
+
+                //Unlock image after last update
                 if (e.ReleaseLock)
                 {
                     desktop.Unlock();
@@ -510,16 +514,16 @@ namespace VncSharpWpf
         /// <param name="scaled">Determines whether to use desktop scaling or leave it normal and clip.</param>
         public void SetScalingMode(bool scaled)
         {
-            //if (scaled)
-            //{
-            //    scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
-            //    scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
-            //}
-            //else
-            //{
-            //    scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            //    scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
-            //}
+            if (scaled)
+            {
+                scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+            }
+            else
+            {
+                scrollviewer.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+                scrollviewer.VerticalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            }
         }
 
 		/// <summary>

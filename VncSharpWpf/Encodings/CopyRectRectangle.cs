@@ -24,55 +24,24 @@ using System.Windows;
 
 namespace VncSharpWpf.Encodings
 {
-	/// <summary>
-	/// Implementation of CopyRect encoding, as well as drawing support. See RFB Protocol document v. 3.8 section 6.5.2.
-	/// </summary>
-	public sealed class CopyRectRectangle : EncodedRectangle 
-	{
-		public CopyRectRectangle(RfbProtocol rfb, Framebuffer framebuffer, Rectangle rectangle)
-			: base(rfb, framebuffer, rectangle, RfbProtocol.COPYRECT_ENCODING) 
-		{
-		}
-
-		// CopyRect Source Point (x,y) from which to copy pixels in Draw
-		System.Drawing.Point source;
-
-		/// <summary>
-		/// Decodes a CopyRect encoded rectangle.
-		/// </summary>
-		public override void Decode()
-		{
-			// Read the source point from which to begin copying pixels
-			source = new System.Drawing.Point();
-			source.X = (int) rfb.ReadUInt16();
-			source.Y = (int) rfb.ReadUInt16();
-		}
-
-        public unsafe override void Draw(WriteableBitmap desktop, int[] pixelbuffer)
+    /// <summary>
+    /// Implementation of CopyRect encoding, as well as drawing support. See RFB Protocol document v. 3.8 section 6.5.2.
+    /// </summary>
+    public sealed class CopyRectRectangle : EncodedRectangle
+    {
+        public CopyRectRectangle(RfbProtocol rfb, Framebuffer framebuffer, Rectangle rectangle)
+            : base(rfb, framebuffer, rectangle, RfbProtocol.COPYRECT_ENCODING)
         {
-            // Avoid exception if window is dragged bottom of screen
-            if (rectangle.Top + rectangle.Height >= framebuffer.Height)
-            {
-                rectangle.Height = framebuffer.Height - rectangle.Top - 1;
-            }
-
-            if ((rectangle.Y * desktop.PixelWidth + rectangle.X) < (source.Y * desktop.PixelWidth + source.X))
-            {
-                Int32Rect srcRect = new Int32Rect(source.X, source.Y, rectangle.Width, rectangle.Height);
-                desktop.Unlock();
-                desktop.WritePixels(srcRect, desktop.BackBuffer, desktop.BackBufferStride * desktop.PixelHeight, desktop.PixelWidth * 4, rectangle.X, rectangle.Y);
-                desktop.Lock();
-            }
-            else
-            {
-                Int32[] pixelBuf = new Int32[rectangle.Width * rectangle.Height];
-                desktop.Unlock();
-                desktop.CopyPixels(new Int32Rect(source.X, source.Y, rectangle.Width, rectangle.Height), pixelBuf, rectangle.Width * 4, 0);
-                desktop.WritePixels(new Int32Rect(0, 0, rectangle.Width, rectangle.Height), pixelBuf, rectangle.Width * 4, rectangle.X, rectangle.Y);
-                desktop.Lock();
-                //DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, pixelBuf);
-            
-            }
         }
-	}
+
+        /// <summary>
+        /// Decodes a CopyRect encoded rectangle.
+        /// </summary>
+        public override void Decode()
+        {
+            // Read the source point from which to begin copying pixels
+            source = new System.Drawing.Point {X = rfb.ReadUInt16(),
+                                               Y = rfb.ReadUInt16()};
+        }
+    }
 }

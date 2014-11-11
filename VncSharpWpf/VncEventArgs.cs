@@ -27,16 +27,17 @@ namespace VncSharpWpf
 	    private bool _releaseLock;
         private bool _Lock;
         private int[] _pixelBuffer;
+        private bool _copyRect;
 
 
-
-        public VncEventArgs(EncodedRectangle updater, bool lockImage, bool releaseLock, int[] pixelBuffer)
+        public VncEventArgs(EncodedRectangle updater, bool lockImage, bool releaseLock, int[] pixelBuffer, bool copyRect)
             : base()
 		{
 			this.updater = updater;
 		    _releaseLock = releaseLock;
 		    _Lock = lockImage;
 		    _pixelBuffer = pixelBuffer;
+            _copyRect = copyRect;
 		}
 		
 		/// <summary>
@@ -53,6 +54,7 @@ namespace VncSharpWpf
 	    {
             get { return _releaseLock; }
 	    }
+
         public bool Lock
         {
             get { return _Lock; }
@@ -62,5 +64,10 @@ namespace VncSharpWpf
 	    {
             get { return _pixelBuffer; }
 	    }
+
+        public bool CopyRect
+        {
+            get { return _copyRect; }
+        }
 	}
 }

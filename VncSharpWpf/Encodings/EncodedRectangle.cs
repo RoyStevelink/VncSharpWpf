@@ -38,6 +38,8 @@ namespace VncSharpWpf.Encodings
 		protected Rectangle		rectangle;
 		protected Framebuffer	framebuffer;
 		protected PixelReader	preader;
+        // CopyRect Source Point (x,y) from which to copy pixels in Draw
+        public System.Drawing.Point source;
 
 		public EncodedRectangle(RfbProtocol rfb, Framebuffer framebuffer, Rectangle rectangle, int encoding)
 		{
@@ -88,20 +90,35 @@ namespace VncSharpWpf.Encodings
 
         /// <summary>
         /// After calling Decode() an EncodedRectangle can be drawn to a Bitmap, which is the local representation of the remote desktop
-        /// Make sure bitmap is properly locked/unlocked
+        /// Make sure bitmap is properly locked/unlocked 
+        /// Do`nt make memer virtual so it can get inlined
         /// </summary>
         /// <param name="desktop">The image the represents the remote desktop. NOTE: this image will be altered.</param>
-        public virtual void Draw(WriteableBitmap desktop, int[] pixelBuffer)
+        /// <param name="pixelBuffer">Buffer containing update info</param>
+        /// <param name="copyRect">Does the pixelbuffer needs to be determined from exising pixels</param>
+        public void Draw(WriteableBitmap desktop, int[] pixelBuffer, bool copyRect)
         {
+            if (copyRect)
+            {
+                // Avoid exception if window is dragged bottom of screen
+                if (rectangle.Top + rectangle.Height >= framebuffer.Height)
+                {
+                    rectangle.Height = framebuffer.Height - rectangle.Top - 1;
+                }
+
+                //Get pixel info from existing buffer
+                pixelBuffer = new int[rectangle.Width*rectangle.Height*4];
+                CopyPixels2(desktop, new Int32Rect(source.X, source.Y, rectangle.Width, rectangle.Height), pixelBuffer);
+            }
+
+            //Update image
             DrawRectangle(desktop, rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, pixelBuffer);
-            
         }
 
 	    public int[] GetPixelBuffer()
 	    {
 	        return framebuffer.GetPixelArray();
 	    }
-        
 
         public void DrawRectangle(WriteableBitmap writeableBitmap, int left, int top, int width, int height, int[] pixelArray)
         {
@@ -131,6 +148,57 @@ namespace VncSharpWpf.Encodings
             }
 
             writeableBitmap.AddDirtyRect(new Int32Rect(left, top, width, height));
+        }
+
+        /// <summary>
+        /// Take a copy of the pixel data from the indicated bitmap at the indicated pixel local.
+        /// </summary>
+        /// <param name="bmp">The bitmap to access</param>
+        /// <param name="sourceRect">A 0-based pixel aread to copy. If this is empty the entire back buffer is copied</param>
+        /// <param name="pixelArray"></param>
+        public static void CopyPixels2(WriteableBitmap bmp, Int32Rect sourceRect, int[] pixelArray)
+        {
+            if (sourceRect.IsEmpty)
+            {
+                sourceRect = new Int32Rect(0, 0, bmp.PixelWidth, bmp.PixelHeight);
+            }
+            else
+            {
+                if (sourceRect.X < 0
+                    || sourceRect.Y < 0
+                    || (sourceRect.X + sourceRect.Width) > bmp.PixelWidth
+                    || (sourceRect.Y + sourceRect.Height) > bmp.PixelHeight)
+                {
+                    throw new ArgumentOutOfRangeException("sourceRect",
+                      string.Format("Source rectangle is outside the bitmap pixel area (bitmap size: {0},{1}. SourceRect: {2}", bmp.PixelWidth, bmp.PixelHeight, sourceRect));
+                }
+            }
+            
+            // we know from our previous checks that the bmp's bytes per pixel == sizeof(PixelColour)
+            var bytesPerPixel = bmp.Format.BitsPerPixel / 8;
+
+            // this is our starting point in the back puffer
+            var pBackBuffer = bmp.BackBuffer + (bmp.BackBufferStride * sourceRect.Y) + sourceRect.X * bytesPerPixel;
+            
+                unsafe
+                {
+                    var count = 0;
+                    // simply loop through the requested source rectangle updating the resultant pixels
+                    for (var iy = 0; iy < sourceRect.Height; iy++)
+                    {
+                        var pPixels = (int*)pBackBuffer;
+                        
+                        //Copy data from buffer
+                        for (var ix = 0; ix < sourceRect.Width; ix++)
+                        {
+                            pixelArray[count] = *(pPixels++);
+                            count ++;
+                        }
+
+                        // stride along to the next row
+                        pBackBuffer += bmp.BackBufferStride;
+                    }
+                }
         }
 
 		/// <summary>

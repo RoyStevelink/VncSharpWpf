@@ -481,9 +481,8 @@ namespace VncSharpWpf
 		/// </summary>
 		private void GetRfbUpdates()
 		{
-			int rectangles;
-			int enc;
-		    int[] pixelBuffer = new int[0];
+		    var pixelBuffer = new int[0];
+
 			// Get the initial destkop from the host
 			RequestScreenUpdate(true);
 
@@ -494,7 +493,7 @@ namespace VncSharpWpf
                 try {
                     switch (rfb.ReadServerMessageType()) {
                         case RfbProtocol.FRAMEBUFFER_UPDATE:
-                            rectangles = rfb.ReadFramebufferUpdate();
+                            int rectangles = rfb.ReadFramebufferUpdate();
 
                             if (CheckIfThreadDone())
                                 break;
@@ -503,6 +502,7 @@ namespace VncSharpWpf
                             for (int i = 0; i < rectangles; ++i) {
                                 // Get the update rectangle's info
                                 Rectangle rectangle;
+                                int enc;
                                 rfb.ReadFramebufferUpdateRectHeader(out rectangle, out enc);
 
                                 // Build a derived EncodedRectangle type and pull-down all the pixel info
@@ -516,21 +516,22 @@ namespace VncSharpWpf
                                     // determine lock /unlock bitmap
                                     bool releaseLock = i == rectangles - 1;
                                     bool Lock = i == 0;
+                                    bool copyRect = true;
                                     if (enc != RfbProtocol.COPYRECT_ENCODING)
                                     {
                                         pixelBuffer = er.GetPixelBuffer();
+                                        copyRect = false;
                                     }
-                                    VncEventArgs e = new VncEventArgs(er, Lock, releaseLock, pixelBuffer);
-                                  //  Thread.Sleep(10);
+                                
                                     // In order to play nicely with WinForms controls, we do a check here to 
                                     // see if it is necessary to synchronize this event with the UI thread.
                                     if (VncUpdate.Target is System.Windows.Forms.Control) {
                                         Control target = VncUpdate.Target as Control;
                                         if (target != null)
-                                            target.Invoke(VncUpdate, new object[] { this, e });
+                                            target.Invoke(VncUpdate, new object[] { this, new VncEventArgs(er, Lock, releaseLock, pixelBuffer, copyRect) });
                                     } else {
                                         // Target is not a WinForms control, so do it on this thread...
-                                        VncUpdate(this, new VncEventArgs(er, Lock, releaseLock, pixelBuffer));
+                                        VncUpdate(this, new VncEventArgs(er, Lock, releaseLock, pixelBuffer, copyRect));
                                     }
                                 }
                             }
