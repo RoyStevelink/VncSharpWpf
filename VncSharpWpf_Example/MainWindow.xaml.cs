@@ -165,6 +165,14 @@ namespace VncSharpWpf_Example
             }
         }
 
+        private void MenuItem_Windows_Click(object sender, RoutedEventArgs e)
+        {
+            if (rdp.IsConnected)
+            {
+                rdp.SendSpecialKeys(SpecialKeys.Windows);
+            }
+        }
+
         private void MenuItem_ClippedView_Click(object sender, RoutedEventArgs e)
         {
             MenuItem_ClippedView.IsChecked = true;
@@ -214,5 +222,7 @@ namespace VncSharpWpf_Example
 
             Application.Current.Shutdown();
         }
+
+      
     }
 }

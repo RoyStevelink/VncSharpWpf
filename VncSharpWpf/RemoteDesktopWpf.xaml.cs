@@ -57,7 +57,8 @@ namespace VncSharpWpf
 		AltF4,
 		CtrlEsc, 
 		Ctrl,
-		Alt
+		Alt,
+        Windows
 	}
 
 	[ToolboxBitmap(typeof(RemoteDesktopWpf), "Resources.vncviewer.ico")]
@@ -999,6 +1000,9 @@ namespace VncSharpWpf
                     break;
                 case SpecialKeys.CtrlEsc:
                     PressKeys(new uint[] { 0xffe3, 0xff1b }, release); // CTRL, ESC
+                    break;
+                case SpecialKeys.Windows:
+                    PressKeys(new uint[] { 0xFFEB}, release); // Windows key
                     break;
                 // TODO: are there more I should support???
                 default:

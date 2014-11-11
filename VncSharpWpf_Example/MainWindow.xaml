@@ -29,6 +29,7 @@
                     <MenuItem Header="CTRL + ESC" Click="MenuItem_CtrlEsc_Click" Name="MenuItem_CtrlEsc" />
                     <MenuItem Header="CTRL" Click="MenuItem_Ctrl_Click" Name="MenuItem_Ctrl" />
                     <MenuItem Header="ALT" Click="MenuItem_Ctrl_Click" Name="MenuItem_Alt"/>
+                    <MenuItem Header="Windows" Click="MenuItem_Windows_Click" Name="MenuItem_Windows"/>
                 </MenuItem>
                 <MenuItem Header="Copy local clipboard to host" Click="MenuItem_CopyClipBoard_Click" Name="MenuItem_CopyClipBoard" IsEnabled="False" />
             </MenuItem>
